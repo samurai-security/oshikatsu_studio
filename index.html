@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>推し活Studio｜推しは、つくる時代へ</title>
+	<meta name="description" content="オリジナルの推しキャラと毎日コミュニケーションを。推し活Studioは、システム開発不要でかんたんにオリジナルAIキャラクター・AIタレントを生成するプラットフォームサービスです。企業や自治体のプロモーションなどのビジネス利用はもちろん、個人で楽しむ「推し活」用途など、さまざまな用途でご利用できるサービスとなっています。">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', Arial, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+        
+        /* メインコンテナ */
+        .wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* ヒーローセクション */
+        .hero {
+            background: linear-gradient(135deg, #6B46C1 0%, #0EA5E9 100%);
+            color: white;
+            text-align: center;
+            padding: 20px 15px 0;
+        }
+        
+        .tagline {
+            background: #ed437b;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .hero h1 {
+            font-size: 28px;
+            margin: 0 0 8px;
+            line-height: 1.1;
+            font-weight: 900;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            padding-bottom: 15px;
+            opacity: 0.9;
+        }
+        
+        /* キャラクタースライダー */
+        .slider-container {
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 16/9;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        
+        .slider {
+            display: flex;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            flex-shrink: 0;
+        }
+        
+        .character {
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .character:active {
+            transform: scale(0.95);
+        }
+        
+        .character img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        
+        /* 拡大モーダル */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        .modal.active {
+            display: block;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            z-index: 1001;
+            background: rgba(0,0,0,0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* スクロールボタン */
+        .slider-buttons {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            pointer-events: none;
+        }
+        
+        .slider-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            pointer-events: all;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s;
+        }
+        
+        .slider-btn:hover {
+            background: rgba(0,0,0,0.7);
+        }
+        
+        .dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            background: rgba(0,0,0,0.6);
+            padding: 4px 8px;
+            border-radius: 15px;
+        }
+        
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .dot.active {
+            background: white;
+            width: 16px;
+            border-radius: 3px;
+        }
+        
+        /* CTAエリア */
+        .cta-area {
+            background: linear-gradient(135deg, #6B46C1 0%, #0EA5E9 100%);
+            color: white;
+            text-align: center;
+            padding: 25px 15px 35px;
+        }
+        
+        .cta-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            font-weight: bold;
+        }
+        
+        .cta-button {
+            background: #FFD700;
+            color: #333;
+            padding: 14px 35px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        /* コンテンツセクション */
+        .section {
+            padding: 35px 15px;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .section-subtitle {
+            font-size: 28px;
+            color: #FF1A6C;
+            margin-bottom: 15px;
+            line-height: 1.3;
+            font-weight: 900;
+        }
+        
+        .section-text {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-left: 30px;
+            margin-right: 30px;
+        }
+        
+        /* 特徴カード */
+        .features-container {
+            position: relative;
+            overflow: hidden;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features {
+            display: flex;
+            gap: 15px;
+            padding: 20px 0;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card {
+            min-width: 260px;
+            background: white;
+            border-radius: 12px;
+            padding: 25px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .feature-icon {
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feature-icon img {
+            display: block;
+            width: 200px;
+        }
+        
+        .feature-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .feature-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        /* 実績セクション - 2列グリッド */
+        .clients-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            padding: 0 15px;
+        }
+        
+        .client-item {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .client-image {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .client-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .client-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .client-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+        
+        /* オリジナルNFTセクション */
+        .nft-section {
+            background: #f9f9f9;
+            padding: 35px 0;
+        }
+        
+        .nft-hero {
+            width: 100%;
+            background: #0D475C;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .nft-intro {
+            padding: 0 15px;
+            margin: 30px;
+        }
+        
+        .nft-intro h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .nft-intro p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .nft-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 0 15px;
+        }
+        
+        .nft-item {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .nft-image {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #0D475C;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .nft-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .nft-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+        
+        /* デモセクション */
+        .demo-section-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .demo-section-subtitle {
+            font-size: 28px;
+            color: #FF1A6C;
+            margin-bottom: 30px;
+            line-height: 1.3;
+            font-weight: 900;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            padding: 0 15px;
+        }
+        
+        .ai-box {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .ai-box:hover {
+            transform: scale(1.05);
+        }
+        
+        .ai-avatar {
+            width: 100%;
+            aspect-ratio: 1/1;
+            max-width: 200px;
+            margin: 0 auto 15px;
+            border-radius: 12px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .ai-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .chat-bubble {
+            position: absolute;
+            top: -1px;
+            right: -5px;
+            background: #FF1A6C;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+        }
+        
+        .ai-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .ai-desc {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* ビデオセクション */
+        .video-section {
+            background: linear-gradient(135deg, #6B46C1 0%, #0EA5E9 100%);
+            color: white;
+            padding: 35px 15px;
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* レスポンシブビデオコンテナ */
+        .video-placeholder > div {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 アスペクト比 */
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .video-placeholder iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        
+        .video-text {
+            text-align: center;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        
+        /* 最終CTAセクション */
+        .final-cta {
+            background: #f9f9f9;
+            text-align: center;
+            padding: 40px 15px;
+        }
+        
+        .final-cta-title {
+            font-size: 24px;
+            color: #FF1A6C;
+            margin-bottom: 20px;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+        
+        .final-cta-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .final-cta-button {
+            background: #FF1A6C;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 17px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(255,26,108,0.3);
+        }
+        
+        .final-cta-note {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #999;
+        }
+        
+        /* 固定CTA */
+        .fixed-cta {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 30px);
+            max-width: 570px;
+            background: #FFD700;
+            color: #333;
+            padding: 14px;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+			text-decoration: none;
+        }
+        
+        /* フッターセクション */
+        .footer {
+            background: #f0f0f0;
+            color: #333;
+            padding: 40px 15px 30px;
+            text-align: center;
+        }
+        
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .footer-item {
+            margin-bottom: 20px;
+        }
+        
+        .footer-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .footer-text {
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+
+        .footer-copyright {
+            margin-top: 30px;
+            padding-top: 20px;
+			padding-bottom: 50px;
+            border-top: 1px solid #555;
+            font-size: 13px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- ヒーローセクション -->
+        <div class="hero">
+            <div class="tagline">AI推し活プラットフォーム</div>
+            <h1>推しは、つくる時代へ。</h1>
+            <p class="subtitle"><strong>推し活Studio</strong></p>
+        </div>
+        
+        <!-- キャラクタースライダー -->
+        <div class="slider-container">
+            <div class="slider" id="slider">
+                <div class="slide">
+                    <div class="character" data-char="1">
+                        <img src="img/aoi.png" alt="葵">
+                    </div>
+                    <div class="character" data-char="2">
+                        <img src="img/tsubasa.png" alt="翼">
+                    </div>
+                    <div class="character" data-char="3">
+                        <img src="img/usa.png" alt="うさぎ">
+                    </div>
+                </div>
+                <div class="slide">
+                    <div class="character" data-char="4">
+                        <img src="img/misaki.png" alt="ミサキ">
+                    </div>
+                    <div class="character" data-char="5">
+                        <img src="img/akane.png" alt="朱音">
+                    </div>
+                    <div class="character" data-char="6">
+                        <img src="img/sakura.png" alt="さくら">
+                    </div>
+                </div>
+            </div>
+            <!-- スクロールボタン -->
+            <div class="slider-buttons">
+                <button class="slider-btn prev" onclick="prevSlide()">＜</button>
+                <button class="slider-btn next" onclick="nextSlide()">＞</button>
+            </div>
+            <div class="dots">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+        
+        <!-- 拡大モーダル -->
+        <div class="modal" id="imageModal">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-content">
+                <img id="modalImage" src="" alt="">
+            </div>
+        </div>
+        
+        <!-- CTAエリア -->
+        <div class="cta-area">
+            <p class="cta-text">
+                最速1週間で<br>
+                あなたの"推し"がデビューします
+            </p>
+            <a href="https://cokb.f.msgs.jp/n/form/cokb/9WvrBfQTkQGwtN57U6vSs" class="cta-button" target="_blank" rel="noopener">詳細を知りたい</a>
+        </div>
+        
+        <!-- メインコンテンツ -->
+        <div class="section">
+            <h2 class="section-title">マーケティング担当者さまへ</h2>
+            <p class="section-subtitle">
+                AIタレントで<br>
+                新時代のプロモーションを
+            </p>
+            <p class="section-text">
+                24時間365日、ファンと繋がる<br>
+                パーソナライズされた体験を提供できます
+            </p>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">自分だけの推しがほしい方</h2>
+            <p class="section-subtitle">
+                オリジナルの推しキャラと<br>
+                毎日コミュニケーションを
+            </p>
+            <p class="section-text"><strong>推し活Studio</strong>は、システム開発不要でかんたんにオリジナルAIキャラクター・AIタレントを生成するプラットフォームサービスです。<br />企業や自治体のプロモーションなどのビジネス利用はもちろん、個人で楽しむ「推し活」用途など、さまざまな用途でご利用できるサービスとなっています。</p>
+        </div>
+        
+        <!-- ビデオセクション -->
+        <div class="video-section">
+            <h2 class="section-title" style="text-align: center; color: white;">1分でわかる！推し活Studio</h2>
+            <div class="video-placeholder">
+                <div style="padding:66.67% 0 0 0;position:relative;">
+                    <iframe src="https://player.vimeo.com/video/1084173703?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="推しは、つくる時代へ。推し活Studio"></iframe>
+                </div>
+                <script src="https://player.vimeo.com/api/player.js"></script>
+            </div>
+            <p class="video-text">サービスの全貌を動画でチェック</p>
+        </div>
+        
+        <!-- 特徴セクション -->
+        <div class="section">
+            <h2 class="section-title">推し活Studioの魅力</h2>
+            <div class="features-container">
+                <div class="features" id="features-slider">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <img src="img/fast.jpg" alt="早い">
+                        </div>
+                        <h3 class="feature-title">最速1週間でローンチ</h3>
+                        <p class="feature-desc">開発不要でオリジナルAIタレントが完成。面倒な作業はお任せ</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <img src="img/cov.jpg" alt="会話">
+                        </div>
+                        <h3 class="feature-title">24/7会話できる</h3>
+                        <p class="feature-desc">ファンとのコミュニケーションを完全自動化</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <img src="img/parsona.jpg" alt="パーソナライズ">
+                        </div>
+                        <h3 class="feature-title">パーソナライズ</h3>
+                        <p class="feature-desc">ユーザとの会話を記憶し、パーソナライズされた体験を提供</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <img src="img/multimedia.jpg" alt="マルチメディア">
+                        </div>
+                        <h3 class="feature-title">マルチメディア展開</h3>
+                        <p class="feature-desc">静止画、動画、Live2Dなどブランドに合わせて最適な表現を</p>
+                    </div>
+                </div>
+                <!-- スクロールボタン（キービジュアルと同じスタイル） -->
+                <div class="slider-buttons">
+                    <button class="slider-btn prev" onclick="prevFeature()">＜</button>
+                    <button class="slider-btn next" onclick="nextFeature()">＞</button>
+                </div>
+                <div class="dots" style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);">
+                    <span class="dot active" onclick="goToFeature(0)"></span>
+                    <span class="dot" onclick="goToFeature(1)"></span>
+                    <span class="dot" onclick="goToFeature(2)"></span>
+                    <span class="dot" onclick="goToFeature(3)"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 実績セクション -->
+        <div class="section">
+            <h2 class="section-title">導入実績</h2>
+            <p class="section-text">
+                自治体から企業まで、さまざまな用途で活用されています
+            </p>
+            <div class="clients-grid">
+                <div class="client-item">
+                    <div class="client-image">
+                        <img src="img/katsuPay.jpg" alt="東京都葛飾区">
+                    </div>
+                    <h3 class="client-title">東京都葛飾区</h3>
+                    <p class="client-text">かつしかPAYのカスタマーサポートを<a href="https://sakura.ai-shacho.tech">「さくら」が担当</a></p>
+                </div>
+                <div class="client-item">
+                    <div class="client-image">
+                        <img src="img/kyoto.jpg" alt="京都市">
+                    </div>
+                    <h3 class="client-title">京都市</h3>
+                    <p class="client-text">京都の応援キャラクター<a href="https://kyotofurusato.ai-shacho.tech">「葵」がふるさと遺贈を全力PR</a></p>
+                </div>
+                
+                <!--一旦非表示
+                <div class="client-item">
+                    <div class="client-image">
+                        <img src="/api/placeholder/200/200" alt="世田谷区">
+                    </div>
+                    <h3 class="client-title">世田谷区</h3>
+                    <p class="client-text">子育て支援AI「せたがやママ」で、24時間365日の育児相談サービスを提供。</p>
+                </div>
+                <div class="client-item">
+                    <div class="client-image">
+                        <img src="/api/placeholder/200/200" alt="千葉県">
+                    </div>
+                    <h3 class="client-title">千葉県</h3>
+                    <p class="client-text">県の公式マスコット「チーバくん」のAI版を開発。県政情報の発信力が大幅に向上。</p>
+                </div>　-->
+            </div>
+        </div>
+        
+        <!-- オリジナルNFTセクション -->
+        <div class="nft-section">
+            <div class="nft-hero" style="background: url('/api/placeholder/600/200') center/cover;">
+                <div style="background:black; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    <img src="img/NFT.png" alt="NFT2" style="width: 100%; height: 100%; padding:8px;" alt="NFTコンテンツに">
+                </div>
+            </div>
+            <div class="nft-intro">
+                <h2>推しキャラNFTでビジネスを拡張</h2>
+                <p>数多くのNFTプロジェクトを手掛けた経験を活用して<strong>推しキャラをNFT化</strong>して<strong>ビジネスを拡張</strong>しましょう。<br>
+「世界で唯一のデジタルコンテンツ」を生成、販売や譲渡、ファンディングの返礼品や地方創生のキラーコンテンツにするなど、<strong>AIコンテンツに付加価値</strong>をつけてビジネスを加速させることが可能です</p>
+            </div>
+            <div class="nft-grid">
+                <div class="nft-item">
+                    <div class="nft-image">
+                        <img src="img/nft001.png" alt="NFT1" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 class="nft-title">一点ものコンテンツ</h3>
+                    <p class="nft-text">１名様限定のマルチメディアコンテンツなど希少性が高いアイテムをNFTとして販売。収益アイテムとして活用できます</p>
+                </div>
+                <div class="nft-item">
+                    <div class="nft-image">
+                        <img src="img/nft002.png" alt="NFT2" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 class="nft-title">権利をNFTに</h3>
+                    <p class="nft-text">タイアップ権など「特別な権利」をNFTとして活用することでビジネスを拡張できます</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- デモセクション -->
+        <div class="section" style="background: #f9f9f9;">
+            <h2 class="demo-section-title">
+                今すぐチャレンジ
+            </h2>
+            <p class="demo-section-subtitle">
+                自分のアイデアを「推し」にしよう
+            </p>
+            <div class="demo-grid">
+                <div class="ai-box">
+                    <div class="ai-avatar">
+                        <a href="https://kyotofurusato.ai-shacho.tech/" target="_blank"><img src="img/model001.png" alt="京都応援キャラ"></a>
+                        <div class="chat-bubble">京都大好き</div>
+                    </div>
+                    <div class="ai-name">京都市を全力応援</div>
+                    <div class="ai-desc">葵</div>
+                </div>
+                <div class="ai-box">
+                    <div class="ai-avatar">
+                        <a href="https://sakura.ai-shacho.tech/" target="_blank"><img src="img/model002.png" alt="葛飾"></a>
+                        <div class="chat-bubble">遊びに来てね</div>
+                    </div>
+                    <div class="ai-name">葛飾のために</div>
+                    <div class="ai-desc">さくら</div>
+                </div>
+                <div class="ai-box">
+                    <div class="ai-avatar">
+                        <a href="https:/marin.ai-shacho.tech/" target="_blank"><img src="img/model003.png" alt="千葉マリン"></a>
+                        <div class="chat-bubble">マリーンズ！</div>
+                    </div>
+                    <div class="ai-name">千葉ロッテ大好き</div>
+                    <div class="ai-desc">真凛</div>
+                </div>
+                <div class="ai-box">
+                    <div class="ai-avatar">
+                        <a href="https://katariba-navi.ai-shacho.tech/" target="_blank"><img src="img/model004.png" alt="かたりば"></a>
+                        <div class="chat-bubble">ゲームしようよ</div>
+                    </div>
+                    <div class="ai-name">ゲームかたりばの進行</div>
+                    <div class="ai-desc">ミサキ</div>
+                </div>
+                <div class="ai-box">
+                    <div class="ai-avatar">
+                        <a href="https://samurai.ai-shacho.tech/" target="_blank"><img src="img/model005.png" alt="SAMURAI Security Inc."></a>
+                        <div class="chat-bubble">ようこそ</div>
+                    </div>
+                    <div class="ai-name">社長の代わりに働く</div>
+                    <div class="ai-desc">社長AI</div>
+                </div>
+                <div class="ai-box">
+                    <div class="ai-avatar">
+                        <img src="img/model006.png" alt="動画">
+                        <div class="chat-bubble">見てね</div>
+                    </div>
+                    <div class="ai-name">AIによるPV</div>
+                    <div class="ai-desc">AIドル</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 最終CTAセクション -->
+        <div class="final-cta">
+            <h2 class="final-cta-title">
+                AIタレントの可能性を、<br>
+                今すぐ体験。
+            </h2>
+            <p class="final-cta-text">
+                カスタマイズ含めてお気軽にご相談ください
+            </p>
+
+        </div>
+    </div>
+    
+    <!-- 固定CTA -->
+
+<a href="https://cokb.f.msgs.jp/n/form/cokb/9WvrBfQTkQGwtN57U6vSs" class="fixed-cta" target="_blank" rel="noopener">
+     今すぐお問い合わせ
+ </a>
+
+    
+    <!-- フッター -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-item">
+              <h3 class="footer-title"><a href="https://saamurai-sec.jp">運営企業</a></h3>
+            </div>
+            <div class="footer-item">
+                <h3 class="footer-title"><a href="https://samurai-sec.jp/privacy/">プライバシーポリシー</a></h3>
+<p class="footer-text">
+</p>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy;SAMURAI Security Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // モーダル関数
+        function openModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = imageSrc;
+            modal.classList.add('active');
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+        }
+        
+        // キャラクター画像クリック時の処理
+        document.querySelectorAll('.character').forEach(character => {
+            character.addEventListener('click', function() {
+                const img = this.querySelector('img');
+                if (img) {
+                    openModal(img.src);
+                }
+            });
+        });
+        
+        // 無限スクロール実装
+        let currentSlide = 0;
+        const slider = document.getElementById('slider');
+        const originalSlides = [...slider.children];
+        const totalSlides = originalSlides.length;
+        let isTransitioning = false;
+        
+        // 前後にクローンを追加
+        function setupInfiniteScroll() {
+            // 最後のスライドのクローンを最初に追加
+            const lastClone = originalSlides[totalSlides - 1].cloneNode(true);
+            slider.insertBefore(lastClone, slider.firstChild);
+            
+            // 最初のスライドのクローンを最後に追加
+            const firstClone = originalSlides[0].cloneNode(true);
+            slider.appendChild(firstClone);
+            
+            // クローンにもイベントリスナーを追加
+            slider.querySelectorAll('.character').forEach(character => {
+                character.addEventListener('click', function() {
+                    const img = this.querySelector('img');
+                    if (img) {
+                        openModal(img.src);
+                    }
+                });
+            });
+            
+            // 初期位置を調整（クローンを考慮）
+            currentSlide = 1;
+            slider.style.transition = 'none';
+            slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            // トランジションを有効化
+            setTimeout(() => {
+                slider.style.transition = 'transform 0.3s ease';
+            }, 50);
+        }
+        
+        function updateDots() {
+            const dots = document.querySelectorAll('.slider-container > .dots > .dot');
+            const actualSlide = ((currentSlide - 1) % totalSlides + totalSlides) % totalSlides;
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === actualSlide);
+            });
+        }
+        
+        function slide(direction) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
+            if (direction === 'next') {
+                currentSlide++;
+            } else {
+                currentSlide--;
+            }
+            
+            slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+            updateDots();
+            
+            // ループ処理
+            setTimeout(() => {
+                if (currentSlide === 0) {
+                    // 最初のクローンから本物の最後へ
+                    slider.style.transition = 'none';
+                    currentSlide = totalSlides;
+                    slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+                } else if (currentSlide === totalSlides + 1) {
+                    // 最後のクローンから本物の最初へ
+                    slider.style.transition = 'none';
+                    currentSlide = 1;
+                    slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+                }
+                
+                setTimeout(() => {
+                    slider.style.transition = 'transform 0.3s ease';
+                    isTransitioning = false;
+                }, 50);
+            }, 300);
+        }
+        
+        // ボタン関数
+        function prevSlide() {
+            slide('prev');
+        }
+        
+        function nextSlide() {
+            slide('next');
+        }
+        
+        // ドットクリック（メインスライダー用）
+        const mainDots = document.querySelectorAll('.slider-container > .dots > .dot');
+        mainDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                if (!isTransitioning) {
+                    currentSlide = index + 1;
+                    slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+                    updateDots();
+                }
+            });
+        });
+        
+        // 特徴スライダー（キービジュアルと同じ方式）
+        let currentFeature = 0;
+        const featuresSlider = document.getElementById('features-slider');
+        const featureCards = featuresSlider.children;
+        const totalFeatureCards = featureCards.length;
+        
+        function goToFeature(index) {
+            currentFeature = index;
+            featuresSlider.style.transform = `translateX(-${index * 275}px)`;
+            const featureDots = document.querySelectorAll('.features-container .dot');
+            featureDots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+        
+        function prevFeature() {
+            currentFeature--;
+            if (currentFeature < 0) {
+                currentFeature = totalFeatureCards - 1;
+            }
+            goToFeature(currentFeature);
+        }
+        
+        function nextFeature() {
+            currentFeature++;
+            if (currentFeature >= totalFeatureCards) {
+                currentFeature = 0;
+            }
+            goToFeature(currentFeature);
+        }
+        
+        // 初期化
+        setupInfiniteScroll();
+        updateDots();
+    </script>
+</body>
+</html>
